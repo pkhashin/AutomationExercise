@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Configuration status="WARN" name="catalina" packages="" monitorInterval="30">
+    <Appenders>
+        <RollingRandomAccessFile name="log"
+                                 fileName="./execution.log"
+                                 filePattern="logs/$${date:yyyy-MM}/app-%d-{MM-dd-yyyy}-%i.log.zip">
+            <PatternLayout>
+                <Pattern>
+                    [ForthERP] (%pid)-(%tid) %d{${LOG_DATEFORMAT_PATTERN:-yyyy-MM-dd HH:mm:ss.$$$}} ${LOG_LEVEL_PATTERN:-%5p}
+                    [%C:%L] - %m%n
+                </Pattern>
+            </PatternLayout>
+            <Policies>
+                <TimeBasedTriggeringPolicy/>
+                <SizeBasedTriggeringPolicy size="250 MB"/>
+            </Policies>
+            <DefaultRollerStrategy max="100"/>
+        </RollingRandomAccessFile>
+        <Console name="console" target="SYSTEM_OUT">
+            <PatternLayout
+                disableAnsi="false"
+                pattern="%highlight{[ForthERP] (%pid)-(%tid) %d{${LOG_DATEFORMAT_PATTERN:-yyyy-MM-dd HH:mm:ss.SSS}} ${LOG_LEVEL_PATTERN:-%5p} [%C:%L]}{FATAL=red blink, ERROR=red, WARN=yellow bold, INFO=green, DEBUG=cyan, TRACE=blue} : %m%n${LOG_EXCEPTION_CONVERSION_WORD:-%rEx}"
+            />
+        </Console>
+    </Appenders>
+    <Loggers>
+        <Logger name="com.mbo" level="TRACE" additivity="false">
+            <AppenderRef ref="log"/>
+            <AppenderRef ref="console"/>
+        </Logger>
+        <Logger name="com.portal" level="DEBUG" additivity="false">
+            <AppenderRef ref="log"/>
+            <AppenderRef ref="console"/>
+        </Logger>
+        <Root level="INFO">
+            <AppenderRef ref="log"/>
+            <AppenderRef ref="console"/>
+        </Root>
+    </Loggers>
+</Configuration>
