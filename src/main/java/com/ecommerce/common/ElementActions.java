@@ -32,8 +32,8 @@ public class ElementActions {
 
     public WebElement waitForVisibilityOfElement(By locator) {
         log.debug("element {}", locator);
-        WebElement element = wait.until(ExpectedConditions.visibilityOfElementLocated(locator));
-        return element;
+        return wait.until(ExpectedConditions.visibilityOfElementLocated(locator));
+
     }
 
 

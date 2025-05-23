@@ -12,12 +12,12 @@ import org.slf4j.LoggerFactory;
 @Slf4j
 public class LoginPage extends LoginRepo {
     private static final Logger log = LoggerFactory.getLogger(LoginPage.class);
-    private final WebDriver driver;
+ //   private final WebDriver driver;
     private final ElementActions eleUtil;
 
 
     public LoginPage(WebDriver driver) {
-        this.driver = driver;
+      //  this.driver = driver;
         eleUtil = new ElementActions(driver);
     }
 
