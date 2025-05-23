@@ -3,11 +3,11 @@ package com.ecommerce.config;
 import java.io.FileInputStream;
 import java.util.Properties;
 
-public class PropertiesManager {
+public class ConfigReader {
 
     private static final Properties prop = new Properties();
     private static boolean isLoaded = false;
-    private PropertiesManager() {
+    private ConfigReader() {
     }
     public static Properties initProp() {
         if (!isLoaded)

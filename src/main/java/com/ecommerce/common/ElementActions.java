@@ -15,10 +15,12 @@ public class ElementActions {
 
     private static final Logger log = LoggerFactory.getLogger(ElementActions.class);
     private final WebDriver driver;
+    private final WebDriverWait wait;
 
 
     public ElementActions(WebDriver driver) {
         this.driver = driver;
+        this.wait=new WebDriverWait(driver, Duration.ofSeconds(8));
     }
 
 
@@ -30,7 +32,6 @@ public class ElementActions {
 
     public WebElement waitForVisibilityOfElement(By locator) {
         log.debug("element {}", locator);
-        WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(8));
         WebElement element = wait.until(ExpectedConditions.visibilityOfElementLocated(locator));
         return element;
     }

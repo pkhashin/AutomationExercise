@@ -1,6 +1,6 @@
 package com.ecommerce.common;
 
-import com.ecommerce.config.PropertiesManager;
+import com.ecommerce.config.ConfigReader;
 import io.github.bonigarcia.wdm.WebDriverManager;
 import lombok.extern.slf4j.Slf4j;
 import org.openqa.selenium.WebDriver;
@@ -12,12 +12,12 @@ import org.slf4j.LoggerFactory;
 @Slf4j
 
 public class DriverManager {
-    private static final Logger log = LoggerFactory.getLogger(ElementActions.class);
+    private static final Logger log = LoggerFactory.getLogger(DriverManager.class);
     private static final ThreadLocal<WebDriver> tl = new ThreadLocal<>();
 
     public WebDriver launchApplication() {
 
-        String browser = PropertiesManager.get("browser", "CHROME").toUpperCase();
+        String browser = ConfigReader.get("browser", "CHROME").toUpperCase();
         log.info("Launching browser: {}", browser);
         switch (browser) {
 
@@ -35,7 +35,7 @@ public class DriverManager {
         WebDriver driver = getDriver();
         getDriver().manage().deleteAllCookies();
         getDriver().manage().window().maximize();
-        getDriver().get(PropertiesManager.get("url"));
+        getDriver().get(ConfigReader.get("url"));
         return driver;
     }
 
