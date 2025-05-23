@@ -50,8 +50,8 @@ public class LoginPage extends LoginRepo {
     }
 
     public String getPageTitle() {
-        String title = eleUtil.waitForTitle(AppConstants.LOGIN_PAGE_TITLE, 8);
-        return title;
+        return eleUtil.waitForTitle(AppConstants.LOGIN_PAGE_TITLE, 8);
+
     }
 
 
