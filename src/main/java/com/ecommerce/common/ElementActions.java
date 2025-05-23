@@ -46,8 +46,7 @@ public class ElementActions {
 
     public WebElement getElement(By locator) {
 
-        WebElement element = driver.findElement(locator);
-        return element;
+        return driver.findElement(locator);
     }
 
     public void clear(By locator) {
