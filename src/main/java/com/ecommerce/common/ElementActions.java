@@ -1,9 +1,6 @@
 package com.ecommerce.common;
 
-import org.openqa.selenium.By;
-import org.openqa.selenium.TimeoutException;
-import org.openqa.selenium.WebDriver;
-import org.openqa.selenium.WebElement;
+import org.openqa.selenium.*;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
 import org.slf4j.Logger;
@@ -16,6 +13,8 @@ public class ElementActions {
     private static final Logger log = LoggerFactory.getLogger(ElementActions.class);
     private final WebDriver driver;
     private final WebDriverWait wait;
+    static final int MAX_RETRIES=3;
+    private WebElement element;
 
 
     public ElementActions(WebDriver driver) {
@@ -26,7 +25,25 @@ public class ElementActions {
 
     public void click(By locator) {
         log.debug("Clicking on element: {}", locator);
-        waitForVisibilityOfElement(locator).click();
+        int i=0;
+        Exception outer = null;
+        while(i<MAX_RETRIES) {
+            try {
+                element = waitForVisibilityOfElement(locator);
+                element.click();
+                return;
+            }
+            catch(StaleElementReferenceException ex){
+                element = waitForVisibilityOfElement(locator);
+                element.click();
+                return;
+            }
+            catch(Exception e){
+                outer=e;
+                ++i;
+            }
+        }
+        throw new RuntimeException("Failed to perform click after retries:" +locator,outer);
 
     }
 
@@ -37,11 +54,35 @@ public class ElementActions {
     }
 
 
-    public void sendKeys(By locator, String value) {
-        log.debug("Sending keys '{}' to element: {}",value, locator);
-        WebElement element = waitForVisibilityOfElement(locator);
-        element.clear();
-        element.sendKeys(value);
+//    public void sendKeys(By locator, String value) {
+//        log.debug("Sending keys '{}' to element: {}",value, locator);
+//        WebElement element = waitForVisibilityOfElement(locator);
+//        element.clear();
+//        element.sendKeys(value);
+//    }
+
+
+        public void sendKeys(By locator, CharSequence... keysToSend) {
+        log.debug("Sending keys '{}' to element: {}",keysToSend, locator);
+        int i=0;
+        Exception outer = null;
+        while(i<MAX_RETRIES) {
+            try {
+                element = waitForVisibilityOfElement(locator);
+                element.clear();
+                element.sendKeys(keysToSend);
+                return;
+            }
+            catch(StaleElementReferenceException ex){
+                element.sendKeys(keysToSend);
+                return;
+            }
+            catch(Exception e){
+                outer=e;
+                ++i;
+            }
+        }
+            throw new RuntimeException("Failed to perform sendKeys after retries:" +locator,outer);
     }
 
     public WebElement getElement(By locator) {
