@@ -1,5 +1,7 @@
-package com.ecommerce.common;
+package com.ecommerce.core;
 
+import com.ecommerce.utils.AllureListener;
+import io.qameta.allure.Step;
 import org.openqa.selenium.*;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
@@ -22,7 +24,7 @@ public class ElementActions {
         this.wait=new WebDriverWait(driver, Duration.ofSeconds(8));
     }
 
-
+@Step("Clicking on element:{locator}")
     public void click(By locator) {
         log.debug("Clicking on element: {}", locator);
         int i=0;
@@ -43,9 +45,11 @@ public class ElementActions {
                 ++i;
             }
         }
+        AllureListener.attachScreenshot("Click Failed Screenshot");
         throw new RuntimeException("Failed to perform click after retries:" +locator,outer);
 
-    }
+
+}
 
     public WebElement waitForVisibilityOfElement(By locator) {
         log.debug("element {}", locator);
@@ -61,7 +65,7 @@ public class ElementActions {
 //        element.sendKeys(value);
 //    }
 
-
+    @Step("Sending keys: {keysToSend} to element: {locator}")
         public void sendKeys(By locator, CharSequence... keysToSend) {
         log.debug("Sending keys '{}' to element: {}",keysToSend, locator);
         int i=0;

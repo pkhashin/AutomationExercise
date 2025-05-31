@@ -1,4 +1,4 @@
-package com.ecommerce.common;
+package com.ecommerce.core;
 
 import org.openqa.selenium.By;
 import org.openqa.selenium.SearchContext;

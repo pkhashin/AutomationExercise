@@ -1,4 +1,4 @@
-package com.ecommerce.repo;
+package com.ecommerce.pages.repo;
 
 import org.openqa.selenium.By;
 

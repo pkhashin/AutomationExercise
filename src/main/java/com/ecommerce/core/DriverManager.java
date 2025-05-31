@@ -1,4 +1,4 @@
-package com.ecommerce.common;
+package com.ecommerce.core;
 
 import com.ecommerce.config.ConfigReader;
 import io.github.bonigarcia.wdm.WebDriverManager;

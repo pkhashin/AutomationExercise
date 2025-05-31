@@ -1,8 +1,8 @@
 package com.ecommerce.pages;
 
-import com.ecommerce.common.ElementActions;
+import com.ecommerce.core.ElementActions;
 import com.ecommerce.constants.AppConstants;
-import com.ecommerce.repo.LoginRepo;
+import com.ecommerce.pages.repo.LoginRepo;
 import lombok.extern.slf4j.Slf4j;
 import org.openqa.selenium.WebDriver;
 import org.slf4j.Logger;
