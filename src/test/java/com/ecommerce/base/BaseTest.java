@@ -7,16 +7,18 @@ import io.qameta.allure.Allure;
 import org.openqa.selenium.WebDriver;
 import org.testng.ITestResult;
 import org.testng.annotations.AfterMethod;
+import org.testng.annotations.AfterTest;
+import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.BeforeTest;
 
 
 public class BaseTest {
-    DriverManager driverManager;
+    protected DriverManager driverManager;
     protected WebDriver driver;
     protected PageManager pageManager;
 
 
-    @BeforeTest
+    @BeforeMethod(alwaysRun = true)
     public void setUp() {
         driverManager = new DriverManager();
         driver = driverManager.launchApplication();
@@ -24,17 +26,11 @@ public class BaseTest {
 
     }
 
-    @AfterMethod
-    public void tearDown(ITestResult result) {
-        if (ITestResult.FAILURE == result.getStatus()) {
-            Allure.getLifecycle().addAttachment(
-                    "Screenshot",
-                    "image/png",
-                    "png",
-                    ScreenshotUtil.captureScreenshot(driver)
-            );
-        }
-        driver.quit();
-    }
+    @AfterMethod(alwaysRun = true)
+    public void tearDown() {
+        if (driver != null) {
 
+            driver.quit();
+        }
+    }
 }

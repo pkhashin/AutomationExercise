@@ -24,7 +24,7 @@ public class ElementActions {
         this.wait=new WebDriverWait(driver, Duration.ofSeconds(8));
     }
 
-@Step("Clicking on element:{locator}")
+
     public void click(By locator) {
         log.debug("Clicking on element: {}", locator);
         int i=0;
@@ -65,7 +65,7 @@ public class ElementActions {
 //        element.sendKeys(value);
 //    }
 
-    @Step("Sending keys: {keysToSend} to element: {locator}")
+
         public void sendKeys(By locator, CharSequence... keysToSend) {
         log.debug("Sending keys '{}' to element: {}",keysToSend, locator);
         int i=0;
@@ -100,7 +100,9 @@ public class ElementActions {
 
     }
 
-    public String waitForTitle(String title, int timeOut) {
+
+    @Step("Verify the page title :{title}")
+    public String waitForPageTitle(String title, int timeOut) {
         WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(timeOut));
         try {
             wait.until(ExpectedConditions.titleContains(title));

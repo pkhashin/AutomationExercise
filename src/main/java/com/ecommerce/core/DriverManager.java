@@ -2,6 +2,7 @@ package com.ecommerce.core;
 
 import com.ecommerce.config.ConfigReader;
 import io.github.bonigarcia.wdm.WebDriverManager;
+import io.qameta.allure.Step;
 import lombok.extern.slf4j.Slf4j;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.chrome.ChromeDriver;
@@ -15,6 +16,7 @@ public class DriverManager {
     private static final Logger log = LoggerFactory.getLogger(DriverManager.class);
     private static final ThreadLocal<WebDriver> tl = new ThreadLocal<>();
 
+    @Step("The application url is launched")
     public WebDriver launchApplication() {
 
         String browser = ConfigReader.get("browser", "CHROME").toUpperCase();

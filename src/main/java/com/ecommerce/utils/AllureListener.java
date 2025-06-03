@@ -15,7 +15,8 @@ public class AllureListener implements ITestListener {
 
     @Override
     public void onTestFailure(ITestResult result) {
-            attachScreenshot("Failure Screenshot");
+
+        attachScreenshot("Failure Screenshot");
         }
 
     @Override

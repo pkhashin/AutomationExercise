@@ -2,14 +2,14 @@ package com.ecommerce.pages;
 
 import com.ecommerce.core.ElementActions;
 import com.ecommerce.pages.repo.HomeRepo;
+import io.qameta.allure.Step;
 import org.openqa.selenium.WebDriver;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class HomePage extends HomeRepo {
 
-    private static final Logger log = LoggerFactory.getLogger(LoginPage.class);
-    //private final WebDriver driver;
+    private static final Logger log = LoggerFactory.getLogger(HomePage.class);
     private final ElementActions eleUtil;
 
     public HomePage(WebDriver driver) {
@@ -17,10 +17,9 @@ public class HomePage extends HomeRepo {
         eleUtil = new ElementActions(driver);
     }
 
+    @Step("Verify the homepage is displayed having logged in user name displayed")
     public String getLoggedInUsername(){
-        String actualUsername =eleUtil.waitForVisibilityOfElement(txtLoggedInUserName).getText();
-        log.info("Logged in username displayed :{}",actualUsername);
-        return actualUsername;
+        return eleUtil.waitForVisibilityOfElement(txtLoggedInUserName).getText();
     }
 
 }
