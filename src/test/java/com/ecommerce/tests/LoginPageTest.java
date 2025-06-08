@@ -16,8 +16,7 @@ public class LoginPageTest extends BaseTest {
 
     @Test
     @Severity(CRITICAL)
-    @Description("Verify the user is able to login")
-    public void verifyLoginWithValidEmailAndPassword() {
+    public void verifyLoginWithValidCredentials() {
 
         String actualTitle = pageManager.getLoginPage().getPageTitle();
         Assert.assertEquals(actualTitle, AppConstants.LOGIN_PAGE_TITLE,"Login page title is not matching");
@@ -30,6 +29,21 @@ public class LoginPageTest extends BaseTest {
 
         String actualUser=pageManager.getHomePage().getLoggedInUsername();
         Assert.assertEquals(actualUser,AppConstants.LOGIN_USERNAME,"Logged in username does not match");
+    }
+
+    @Test
+    @Severity(CRITICAL)
+    public void verifyLoginWithInvalidCredentials(){
+        pageManager.getLoginPage().clickSignUpButton();
+        Assert.assertTrue(pageManager.getLoginPage().headerTextIsDisplayed(),"Header not displayed on login page ");
+
+        pageManager.getLoginPage().login(ConfigReader.get("invalidusername"), ConfigReader.get("password"));
+        pageManager.getLoginPage().clickLoginButton();
+
+        String actualText=pageManager.getLoginPage().getLoginErrorText();
+        Assert.assertEquals(actualText,AppConstants.LOGIN_ERROR_TEXT,"Error text is not displayed");
+
+
     }
 
 

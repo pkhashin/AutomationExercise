@@ -1,7 +1,6 @@
 package com.ecommerce.core;
 
 import com.ecommerce.utils.AllureListener;
-import io.qameta.allure.Step;
 import org.openqa.selenium.*;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
@@ -15,93 +14,80 @@ public class ElementActions {
     private static final Logger log = LoggerFactory.getLogger(ElementActions.class);
     private final WebDriver driver;
     private final WebDriverWait wait;
-    static final int MAX_RETRIES=3;
-    private WebElement element;
+    static final int MAX_RETRIES = 3;
 
 
     public ElementActions(WebDriver driver) {
         this.driver = driver;
-        this.wait=new WebDriverWait(driver, Duration.ofSeconds(8));
+        this.wait = new WebDriverWait(driver, Duration.ofSeconds(8));
     }
 
 
     public void click(By locator) {
+
         log.debug("Clicking on element: {}", locator);
-        int i=0;
-        Exception outer = null;
-        while(i<MAX_RETRIES) {
+        Exception lastException = null;
+        for (int i = 0; i < MAX_RETRIES; i++) {
             try {
-                element = waitForVisibilityOfElement(locator);
-                element.click();
+                WebElement elementToClick = waitForVisibilityOfElement(locator);
+                elementToClick.click();
+                log.info("Sucessfully clicked element: {}", locator);
                 return;
-            }
-            catch(StaleElementReferenceException ex){
-                element = waitForVisibilityOfElement(locator);
-                element.click();
-                return;
-            }
-            catch(Exception e){
-                outer=e;
-                ++i;
+            } catch (StaleElementReferenceException ex) {
+                lastException = ex;
+                log.warn("StaleElementReferenceException encountered for {}. Retrying click (attempt {}/{})", locator, i + 1, MAX_RETRIES);
+            } catch (Exception e) {
+                lastException = e;
+                log.error("An unexpected error occurred during click on {}. Retrying (attempt {}/{}): {}", locator, i + 1, MAX_RETRIES, e.getMessage());
             }
         }
-        AllureListener.attachScreenshot("Click Failed Screenshot");
-        throw new RuntimeException("Failed to perform click after retries:" +locator,outer);
+        // If all retries fail, attach screenshot and throw RuntimeException
+        AllureListener.attachScreenshot("Click Failed for:" + locator);
+        throw new RuntimeException("Failed to perform click after retries:" + MAX_RETRIES + " retries: " + locator, lastException);
 
 
-}
+    }
 
     public WebElement waitForVisibilityOfElement(By locator) {
-        log.debug("element {}", locator);
+        log.debug("Waiting for presence of element : {}", locator);
         return wait.until(ExpectedConditions.visibilityOfElementLocated(locator));
 
     }
 
+    public void sendKeys(By locator, CharSequence... keysToSend) {
 
-//    public void sendKeys(By locator, String value) {
-//        log.debug("Sending keys '{}' to element: {}",value, locator);
-//        WebElement element = waitForVisibilityOfElement(locator);
-//        element.clear();
-//        element.sendKeys(value);
-//    }
-
-
-        public void sendKeys(By locator, CharSequence... keysToSend) {
-        log.debug("Sending keys '{}' to element: {}",keysToSend, locator);
-        int i=0;
-        Exception outer = null;
-        while(i<MAX_RETRIES) {
+        log.debug("Sending keys '{}' to element: {}", keysToSend, locator);
+        Exception lastException = null;
+        for (int i = 0; i < MAX_RETRIES; i++) {
             try {
-                element = waitForVisibilityOfElement(locator);
-                element.clear();
-                element.sendKeys(keysToSend);
+                WebElement elementSendKeys = waitForVisibilityOfElement(locator);
+                elementSendKeys.clear();
+                elementSendKeys.sendKeys(keysToSend);
+                log.info("Sucessfully send keys '{}'to element: {}", keysToSend, locator);
                 return;
-            }
-            catch(StaleElementReferenceException ex){
-                element.sendKeys(keysToSend);
-                return;
-            }
-            catch(Exception e){
-                outer=e;
-                ++i;
+            } catch (StaleElementReferenceException ex) {
+                lastException = ex;
+                log.warn("StaleElementReferenceException encountered for {}. Retrying sendKeys (attempt {}/{})", locator, i + 1, MAX_RETRIES);
+            } catch (Exception e) {
+                lastException = e;
+                log.error("An unexpected error occurred during click on {}. Retrying (attempt {}/{}): {}", locator, i + 1, MAX_RETRIES, e.getMessage());
+
             }
         }
-            throw new RuntimeException("Failed to perform sendKeys after retries:" +locator,outer);
-    }
-
-    public WebElement getElement(By locator) {
-
-        return driver.findElement(locator);
+        throw new RuntimeException("Failed to perform sendKeys to element after " + MAX_RETRIES + " retries: " + locator, lastException);
     }
 
     public void clear(By locator) {
-
-        getElement(locator).clear();
-
+        try {
+            WebElement elementToClear = waitForVisibilityOfElement(locator);
+            elementToClear.clear();
+            log.info("Successfully cleared text from element: {}", locator);
+        } catch (Exception e) {
+            AllureListener.attachScreenshot("Clear Failed for: " + locator);
+            throw new RuntimeException("Failed to clear text from element " + locator + ": " + e.getMessage(), e);
+        }
     }
 
-
-    @Step("Verify the page title :{title}")
     public String waitForPageTitle(String title, int timeOut) {
         WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(timeOut));
         try {
@@ -110,10 +96,29 @@ public class ElementActions {
             log.info("Page title matched: {}", actualTitle);
             return actualTitle;
         } catch (TimeoutException e) {
-            log.warn("Page title did not contain expected text '{}' within {} seconds", title, timeOut);
+            log.warn("Page title did not contain expected text '{}' within {} seconds", title, timeOut, driver.getTitle());
             return null;
         }
     }
 
+    public boolean isDisplayed(By locator) {
+        log.debug("Checking if element is displayed: {}", locator);
+        wait.until(ExpectedConditions.visibilityOfElementLocated(locator));
+        return true;
+    }
 
+    public String getText(By locator) {
+        String elementText = null;
+        for (int i = 0; i < MAX_RETRIES; i++) {
+            try {
+                WebElement element = waitForVisibilityOfElement(locator);
+                elementText = element.getText();
+                return elementText;
+            } catch (StaleElementReferenceException e) {
+                log.warn("StaleElementReferenceException caught while getting text from {}. Retrying... (Attempt {}/{})", locator, i + 1, MAX_RETRIES);
+            }
+        }
+        return null;
+    }
 }
+
