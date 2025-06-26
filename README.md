@@ -7,5 +7,5 @@ The project was created to practice test automation skills using the Selenium (J
 IntelliJ IDEA
 Maven
 Selenium WebDriver
-TestNG
+TestNG 
 Allure Report
