@@ -26,22 +26,34 @@ public class LoginPage extends LoginRepo {
         eleUtil.click(btnSignUp);
     }
 
+    @Step("Enter the username:{username}")
+    public void enterUsername(String userName){
+        log.info("Entering the username : {}", userName);
+        eleUtil.sendKeys(txtUsername, userName);
+    }
+
+    @Step("Enter the password:******")
+    public void enterPassword(String password){
+        log.info("Entering the password : {}", password  );
+        eleUtil.sendKeys(txtPassword, password);
+    }
+
     public boolean headerTextIsDisplayed() {
         boolean isDisplayed = eleUtil.isDisplayed(hdrLoginToyourAccount);
         log.info("Header 'Login to your account' text is displayed :{}", isDisplayed);
         return isDisplayed;
     }
 
-    @Step("Enter the username : {username} and password : ******")
     public void login(String username, String password) {
-
-        log.info("Entering the username : {}", username);
-        eleUtil.sendKeys(txtUsername, username);
-        log.info("Entering the password : {}", password);
-        eleUtil.sendKeys(txtPassword, password);
-
+      enterUsername(username);
+      enterPassword(password);
     }
 
+
+    public void clicklogOut(){
+        log.info("Clicked on the logout button");
+        eleUtil.click(btnLogOut);
+    }
     @Step("Click on Login button")
     public void clickLoginButton() {
         log.info("Clicked on the login button");

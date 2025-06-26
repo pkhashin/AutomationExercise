@@ -41,8 +41,6 @@ public class ElementActions {
                 log.error("An unexpected error occurred during click on {}. Retrying (attempt {}/{}): {}", locator, i + 1, MAX_RETRIES, e.getMessage());
             }
         }
-        // If all retries fail, attach screenshot and throw RuntimeException
-        AllureListener.attachScreenshot("Click Failed for:" + locator);
         throw new RuntimeException("Failed to perform click after retries:" + MAX_RETRIES + " retries: " + locator, lastException);
 
 
@@ -83,7 +81,6 @@ public class ElementActions {
             elementToClear.clear();
             log.info("Successfully cleared text from element: {}", locator);
         } catch (Exception e) {
-            AllureListener.attachScreenshot("Clear Failed for: " + locator);
             throw new RuntimeException("Failed to clear text from element " + locator + ": " + e.getMessage(), e);
         }
     }

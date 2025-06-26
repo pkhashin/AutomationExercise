@@ -9,6 +9,8 @@ public abstract class LoginRepo {
     protected final By txtPassword=By.xpath("//input[@name='password']");
     protected final By btnSignIn=By.xpath("//button[@type='submit']");
 
+    protected final By btnLogOut=By.xpath("//a[contains(text(),' Logout')]");
+
     protected final By hdrLoginToyourAccount=By.xpath("//h2[contains(text(),'Login to your account')]");
     protected final By errortxtLogin=By.xpath("//form[@action='/login']//p");
 
