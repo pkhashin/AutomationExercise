@@ -21,7 +21,7 @@ pipeline {
                 script {
                     def mvnCmd = "mvn clean test -DsuiteXmlFile=${params.TESTNG_XML}"
                     echo "Running tests with command: ${mvnCmd}"
-                    sh mvnCmd
+                    bat mvnCmd
                 }
             }
         }
