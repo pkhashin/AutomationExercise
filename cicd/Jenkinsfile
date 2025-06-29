@@ -1,0 +1,66 @@
+pipeline {
+    agent any
+
+    parameters {
+        string(name: 'RECIPIENTS', defaultValue: 'muhammedhashin16@gmail.com', description: 'Email recipients')
+        string(name: 'PROJECT_NAME', defaultValue: 'AutomationExercise', description: 'Project name')
+        string(name: 'REPORT_SRC', defaultValue: 'allure-results', description: 'Allure results folder')
+        string(name: 'TESTNG_XML', defaultValue: 'testng.xml', description: 'Path to TestNG XML suite file')
+        string(name: 'REPLY_TO', defaultValue: 'muhammedhashin16@gmail.com', description: 'Reply-to email')
+    }
+
+    stages {
+        stage('Checkout') {
+            steps {
+                checkout scm
+            }
+        }
+
+        stage('Run Tests') {
+            steps {
+                script {
+                    def mvnCmd = "mvn clean test -DsuiteXmlFile=${params.TESTNG_XML}"
+                    echo "Running tests with command: ${mvnCmd}"
+                    sh mvnCmd
+                }
+            }
+        }
+    }
+
+    post {
+        always {
+            archiveArtifacts artifacts: "${params.REPORT_SRC}/**", allowEmptyArchive: true
+
+            publishHTML(target: [
+                reportDir: "${params.REPORT_SRC}",
+                reportFiles: 'index.html',
+                reportName: "Allure Report - ${params.PROJECT_NAME}",
+                keepAll: true
+            ])
+        }
+
+        failure {
+            emailext(
+                subject: "Build FAILED - ${params.PROJECT_NAME}",
+                body: """
+                    <p>Build failed. Please check the Jenkins job: <a href='${env.BUILD_URL}'>${env.JOB_NAME} #${env.BUILD_NUMBER}</a></p>
+                """,
+                to: params.RECIPIENTS,
+                replyTo: params.REPLY_TO,
+                mimeType: 'text/html'
+            )
+        }
+
+        success {
+            emailext(
+                subject: "Build SUCCESS - ${params.PROJECT_NAME}",
+                body: """
+                    <p>Build succeeded. Check the report: <a href='${env.BUILD_URL}'>${env.JOB_NAME} #${env.BUILD_NUMBER}</a></p>
+                """,
+                to: params.RECIPIENTS,
+                replyTo: params.REPLY_TO,
+                mimeType: 'text/html'
+            )
+        }
+    }
+}
