@@ -19,7 +19,7 @@ pipeline {
         stage('Run Tests') {
             steps {
                 script {
-                    def mvnCmd = "mvn clean test -DsuiteXmlFile="${params.TESTNG_XML}"
+                    def mvnCmd = bat "mvn clean test -DsuiteXmlFile=\"${params.TESTNG_XML}\""
                     echo "Running tests with command: ${mvnCmd}"
                     bat mvnCmd
                 }
