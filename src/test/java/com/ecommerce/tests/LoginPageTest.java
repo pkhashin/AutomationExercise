@@ -17,7 +17,6 @@ import org.testng.annotations.Listeners;
 import org.testng.annotations.Test;
 
 @Slf4j
-@Listeners({AllureListener.class})
 public class LoginPageTest extends BaseTest {
     private static final Logger log = LoggerFactory.getLogger(LoginPageTest.class);
 
