@@ -4,7 +4,7 @@ pipeline {
     parameters {
         string(name: 'RECIPIENTS', defaultValue: 'muhammedhashin16@gmail.com', description: 'Email recipients')
         string(name: 'PROJECT_NAME', defaultValue: 'AutomationExercise', description: 'Project name')
-        string(name: 'REPORT_SRC', defaultValue: 'allure-results', description: 'Allure results folder')
+        string(name: 'REPORT_SRC', defaultValue: 'ForthErp/allure-results', description: 'Allure results folder')
         string(name: 'TESTNG_XML', defaultValue: 'testng.xml', description: 'Path to TestNG XML suite file')
         string(name: 'REPLY_TO', defaultValue: 'muhammedhashin16@gmail.com', description: 'Reply-to email')
     }
@@ -18,10 +18,9 @@ pipeline {
 
         stage('Run Tests') {
             steps {
-                script {
-                    def mvnCmd = bat "mvn clean test -DsuiteXmlFile=\"${params.TESTNG_XML}\""
-                    echo "Running tests with command: ${mvnCmd}"
-                    bat mvnCmd
+                dir('ForthErp') {
+                    echo "Running tests with mvn clean test -DsuiteXmlFile=${params.TESTNG_XML}"
+                    bat "mvn clean test -DsuiteXmlFile=${params.TESTNG_XML}"
                 }
             }
         }
@@ -29,7 +28,7 @@ pipeline {
 
     post {
         always {
-            archiveArtifacts artifacts: "${params.REPORT_SRC}/**", allowEmptyArchive: true
+            archiveArtifacts artifacts: "${params.REPORT_SRC}/*", allowEmptyArchive: true
 
             publishHTML(target: [
                 reportDir: "${params.REPORT_SRC}",
