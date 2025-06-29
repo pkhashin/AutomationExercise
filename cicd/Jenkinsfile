@@ -28,14 +28,17 @@ pipeline {
 
     post {
         always {
-            archiveArtifacts artifacts: "${params.REPORT_SRC}/*", allowEmptyArchive: true
+        script {
+            def reportPath = params.REPORT_SRC
+            archiveArtifacts artifacts: "${reportPath}/*", allowEmptyArchive: true
 
             publishHTML(target: [
-                reportDir: "${params.REPORT_SRC}",
+                reportDir: reportPath,
                 reportFiles: 'index.html',
                 reportName: "Allure Report - ${params.PROJECT_NAME}",
                 keepAll: true
             ])
+        }
         }
 
         failure {
