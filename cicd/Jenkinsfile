@@ -21,6 +21,7 @@ pipeline {
                 dir('ForthErp') {
                     echo "Running tests with mvn clean test -DsuiteXmlFile=${params.TESTNG_XML}"
                     bat "mvn clean test -DsuiteXmlFile=${params.TESTNG_XML}"
+                    bat 'dir allure-results /s /b'
                 }
             }
         }
@@ -30,7 +31,7 @@ pipeline {
         always {
         script {
             def reportPath = params.REPORT_SRC
-            archiveArtifacts artifacts: "${reportPath}/*", allowEmptyArchive: true
+            archiveArtifacts artifacts: "${reportPath}/**", allowEmptyArchive: true
 
             publishHTML(target: [
                 reportDir: reportPath,
