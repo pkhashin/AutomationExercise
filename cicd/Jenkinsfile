@@ -18,7 +18,7 @@ pipeline {
 
         stage('Run Tests') {
             steps {
-                dir('ForthErp') {
+              {
                     echo "Running tests with mvn clean test -DsuiteXmlFile=testng.xml"
                      bat 'dir testng.xml'
                     bat "mvn -X clean test -DsuiteXmlFile=testng.xml"
