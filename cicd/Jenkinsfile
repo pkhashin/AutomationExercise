@@ -33,7 +33,7 @@ pipeline {
                     script {
                         // 'withMaven' ensures Maven is properly set up in the environment
                         // Replace 'Maven 3.6.8' with the exact name from Jenkins Global Tool Configuration
-                        withMaven(maven: 'Maven 3.8.8') {
+                        withMaven(maven: 'Maven') {
                             // Execute Maven command: clean, then test
                             // "-DsuiteXmlFile=../${params.TESTNG_XML}" tells TestNG to use the XML file
                             // located one directory up from 'ForthErp'
