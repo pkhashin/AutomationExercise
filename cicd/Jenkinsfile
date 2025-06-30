@@ -56,33 +56,33 @@ pipeline {
         }
 
         // Stage 3: Generate the Allure HTML report from raw results
-        stage('Generate Allure Report') {
-            steps {
-                // Change directory back to the Maven project root where allure-results are found
-                dir('ForthErp') {
-                    echo "Generating Allure HTML report from raw results..."
-                    script {
-                        // 'withAllure' ensures the Allure command-line tool is available in PATH
-                        // Replace 'Allure' with the exact name from Jenkins Global Tool Configuration
-                        withAllure('Allure') {
-                            // Command to generate HTML report:
-                            // '--clean' removes previous report, '-o' specifies output directory
-                            bat "allure generate --clean \"${params.ALLURE_RESULTS_DIR}\" -o \"${params.REPORT_SRC}\""
-                        } // Closes withAllure block
-                    } // Closes script block
-                } // Closes dir('ForthErp') block
-            } // Closes steps block
-            // Post-actions specific to this stage (e.g., archiving raw results)
-            post {
-                always {
-                    dir('ForthErp') {
-                        echo "Archiving Allure raw results..."
-                        // Archive the raw results for later inspection or regeneration
-                        archiveArtifacts artifacts: "${params.ALLURE_RESULTS_DIR}/**", allowEmptyArchive: true
-                    }
-                }
-            } // Closes post for Generate Allure Report stage
-        } // Closes stage('Generate Allure Report') block
+       stage('Generate Allure Report') {
+           steps {
+               // Change directory back to the Maven project root where allure-results are found
+               dir('ForthErp') {
+                   echo "Generating Allure HTML report from raw results..."
+                   script {
+                       // 'withAllure' ensures the Allure command-line tool is available in PATH
+                       // Replace 'Allure' with the exact name from Jenkins Global Tool Configuration
+                       withAllure('Allure') { // This step requires the Allure Jenkins Plugin
+                           // Command to generate HTML report:
+                           // '--clean' removes previous report, '-o' specifies output directory
+                           bat "allure generate --clean \"${params.ALLURE_RESULTS_DIR}\" -o \"${params.REPORT_SRC}\""
+                       } // Closes withAllure block
+                   } // Closes script block
+               } // Closes dir('ForthErp') block
+           } // Closes steps block
+           // Post-actions specific to this stage (e.g., archiving raw results)
+           post {
+               always {
+                   dir('ForthErp') {
+                       echo "Archiving Allure raw results..."
+                       // Archive the raw results for later inspection or regeneration
+                       archiveArtifacts artifacts: "${params.ALLURE_RESULTS_DIR}/**", allowEmptyArchive: true
+                   }
+               }
+           } // Closes post for Generate Allure Report stage
+       } // Closes stage('Generate Allure Report') block
 
     } // Closes stages block
 
