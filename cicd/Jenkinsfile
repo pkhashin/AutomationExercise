@@ -26,10 +26,10 @@ pipeline {
         stage('Run Tests') {
             steps {
                 dir('ForthErp') {
-                    echo "Running tests with Maven. TestNG XML file: ./${params.TESTNG_XML}"
+                    echo "Running tests with Maven. TestNG XML file:../${params.TESTNG_XML}"
                     script {
                         withMaven(maven: 'Maven') {
-                        bat "mvn clean test \"-DsuiteXmlFile=./${params.TESTNG_XML}\""
+                        bat "mvn clean test \"-DsuiteXmlFile=../${params.TESTNG_XML}\""
                         }
                     }
                 }
