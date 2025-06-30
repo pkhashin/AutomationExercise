@@ -20,8 +20,8 @@ pipeline {
             steps {
             dir('ForthErp') {
 
-                    echo "Running tests with mvn clean test -DsuiteXmlFile=testng.xml"
-                    bat 'mvn clean test "-DsuiteXmlFile=testng.xml"'
+                    echo "Running tests with mvn clean test -DsuiteXmlFile=../testng.xml"
+                    bat 'mvn clean test "-DsuiteXmlFile=../testng.xml"'
                     bat 'dir allure-results /s /b'
                     }
 
