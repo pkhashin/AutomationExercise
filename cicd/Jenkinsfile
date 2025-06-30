@@ -18,14 +18,13 @@ pipeline {
 
         stage('Run Tests') {
             steps {
-dir('ForthErp') {
-                    echo "Running tests with mvn clean test -DsuiteXmlFile=testng.xml"
-                     bat 'dir testng.xml'
-                    bat "mvn clean test -DsuiteXmlFile=testng.xml"
+
+                    echo "Running tests with mvn clean test -DsuiteXmlFile=${params.TESTNG_XML}"
+                    bat 'mvn clean test "-DsuiteXmlFile=${params.TESTNG_XML}"'
                     bat 'dir allure-results /s /b'
                     }
 
-            }
+
         }
     }
 
