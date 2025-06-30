@@ -25,24 +25,16 @@ pipeline {
         // Stage 2: Run the automated tests using Maven and TestNG
         stage('Run Tests') {
             steps {
-                // Change directory to the Maven project root (ForthErp)
                 dir('ForthErp') {
-                    echo "Running tests with Maven. TestNG XML file: ../${params.TESTNG_XML}"
-
-                    // Use 'script' block to encapsulate Groovy-specific steps like 'withMaven'
+                    echo "Running tests with Maven. TestNG XML file: ./${params.TESTNG_XML}"
                     script {
-                        // 'withMaven' ensures Maven is properly set up in the environment
-                        // Replace 'Maven 3.6.8' with the exact name from Jenkins Global Tool Configuration
                         withMaven(maven: 'Maven') {
-                            // Execute Maven command: clean, then test
-                            // "-DsuiteXmlFile=../${params.TESTNG_XML}" tells TestNG to use the XML file
-                            // located one directory up from 'ForthErp'
-                            bat "mvn clean test \"-DsuiteXmlFile=../${params.TESTNG_XML}\""
-                        } // Closes withMaven block
-                    } // Closes script block
-                } // Closes dir('ForthErp') block
-            } // Closes steps block
-        } // Closes stage('Run Tests') block
+                        bat "mvn clean test \"-DsuiteXmlFile=./${params.TESTNG_XML}\""
+                        }
+                    }
+                }
+            }
+        }
 
         // Stage 3: Generate the Allure HTML report from raw results
         stage('Generate Allure Report') {
