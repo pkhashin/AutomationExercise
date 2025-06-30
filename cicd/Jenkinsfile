@@ -1,58 +1,106 @@
-pipeline {
-    agent any
+// Jenkinsfile for AutomationExercise Project
 
+pipeline {
+    agent any // Specifies that the pipeline can run on any available agent
+
+    // Define parameters for the pipeline, allowing user input at build time
     parameters {
-        string(name: 'RECIPIENTS', defaultValue: 'muhammedhashin16@gmail.com', description: 'Email recipients')
-        string(name: 'PROJECT_NAME', defaultValue: 'AutomationExercise', description: 'Project name')
-        string(name: 'REPORT_SRC', defaultValue: 'ForthErp/allure-results', description: 'Allure results folder')
-        string(name: 'TESTNG_XML', defaultValue: 'testng.xml', description: 'Path to TestNG XML suite file')
-        string(name: 'REPLY_TO', defaultValue: 'muhammedhashin16@gmail.com', description: 'Reply-to email')
+        string(name: 'RECIPIENTS', defaultValue: 'muhammedhashin16@gmail.com', description: 'Email recipients for notifications')
+        string(name: 'PROJECT_NAME', defaultValue: 'AutomationExercise', description: 'Name of the project for reports and notifications')
+        string(name: 'REPORT_SRC', defaultValue: 'ForthErp/allure-report', description: 'Folder where the Allure HTML report will be generated')
+        string(name: 'TESTNG_XML', defaultValue: 'testng.xml', description: 'Filename of the TestNG XML suite file (expected in repository root)')
+        string(name: 'REPLY_TO', defaultValue: 'muhammedhashin16@gmail.com', description: 'Reply-to email address for notifications')
+        string(name: 'ALLURE_RESULTS_DIR', defaultValue: 'ForthErp/allure-results', description: 'Folder where Allure raw test results are stored by Maven')
     }
 
+    // Define the stages of your pipeline
     stages {
-        stage('Checkout') {
+        // Stage 1: Checkout the source code from Git
+        stage('Checkout Source Code') { // Renamed for clarity
             steps {
-                checkout scm
+                checkout scm // Standard step to checkout the project from the SCM defined in job configuration
             }
         }
 
+        // Stage 2: Run the automated tests using Maven and TestNG
         stage('Run Tests') {
             steps {
-            dir('ForthErp') {
+                // Change directory to the Maven project root (ForthErp)
+                dir('ForthErp') {
+                    echo "Running tests with Maven. TestNG XML file: ../${params.TESTNG_XML}"
 
-                    echo "Running tests with mvn clean test -DsuiteXmlFile=../testng.xml"
+                    // Use 'script' block to encapsulate Groovy-specific steps like 'withMaven'
                     script {
-                    withMaven(maven: 'Maven 3.6.8') {
-                         bat 'mvn clean test "-DsuiteXmlFile=../testng.xml"'
+                        // 'withMaven' ensures Maven is properly set up in the environment
+                        // Replace 'Maven 3.6.8' with the exact name from Jenkins Global Tool Configuration
+                        withMaven(maven: 'Maven 3.8.8') {
+                            // Execute Maven command: clean, then test
+                            // "-DsuiteXmlFile=../${params.TESTNG_XML}" tells TestNG to use the XML file
+                            // located one directory up from 'ForthErp'
+                            bat "mvn clean test \"-DsuiteXmlFile=../${params.TESTNG_XML}\""
+                        } // Closes withMaven block
+                    } // Closes script block
+                } // Closes dir('ForthErp') block
+            } // Closes steps block
+        } // Closes stage('Run Tests') block
+
+        // Stage 3: Generate the Allure HTML report from raw results
+        stage('Generate Allure Report') {
+            steps {
+                // Change directory back to the Maven project root where allure-results are found
+                dir('ForthErp') {
+                    echo "Generating Allure HTML report from raw results..."
+                    script {
+                        // 'withAllure' ensures the Allure command-line tool is available in PATH
+                        // Replace 'Allure' with the exact name from Jenkins Global Tool Configuration
+                        withAllure('Allure') {
+                            // Command to generate HTML report:
+                            // '--clean' removes previous report, '-o' specifies output directory
+                            bat "allure generate --clean \"${params.ALLURE_RESULTS_DIR}\" -o \"${params.REPORT_SRC}\""
+                        } // Closes withAllure block
+                    } // Closes script block
+                } // Closes dir('ForthErp') block
+            } // Closes steps block
+            // Post-actions specific to this stage (e.g., archiving raw results)
+            post {
+                always {
+                    dir('ForthErp') {
+                        echo "Archiving Allure raw results..."
+                        // Archive the raw results for later inspection or regeneration
+                        archiveArtifacts artifacts: "${params.ALLURE_RESULTS_DIR}/**", allowEmptyArchive: true
                     }
+                }
+            } // Closes post for Generate Allure Report stage
+        } // Closes stage('Generate Allure Report') block
 
-                    bat 'dir allure-results /s /b'
-                    }
+    } // Closes stages block
 
-}
-        }
-    }
-
+    // Define post-build actions that run after all stages are complete
     post {
+        // 'always' block runs regardless of stage success or failure
         always {
-        script {
-            def reportPath = params.REPORT_SRC
-            archiveArtifacts artifacts: "${reportPath}/**", allowEmptyArchive: true
+            script {
+                echo "Publishing HTML report and sending email notifications..."
+                // Publish the generated Allure HTML report on the Jenkins build page
+                publishHTML(target: [
+                    reportDir: params.REPORT_SRC, // This should point to ForthErp/allure-report
+                    reportFiles: 'index.html',     // The main HTML file to display
+                    reportName: "Allure Report - ${params.PROJECT_NAME}", // Name displayed in Jenkins UI
+                    keepAll: true                  // Keep reports for all builds
+                ])
+            } // Closes script block
+        } // Closes always block
 
-            publishHTML(target: [
-                reportDir: reportPath,
-                reportFiles: 'index.html',
-                reportName: "Allure Report - ${params.PROJECT_NAME}",
-                keepAll: true
-            ])
-        }
-        }
-
+        // 'failure' block runs only if the pipeline fails
         failure {
             emailext(
-                subject: "Build FAILED - ${params.PROJECT_NAME}",
+                subject: "Build FAILED - ${params.PROJECT_NAME} #${env.BUILD_NUMBER}",
                 body: """
-                    <p>Build failed. Please check the Jenkins job: <a href='${env.BUILD_URL}'>${env.JOB_NAME} #${env.BUILD_NUMBER}</a></p>
+                    <p>Hello Team,</p>
+                    <p>The Jenkins build for <b>${params.PROJECT_NAME}</b> (Build #${env.BUILD_NUMBER}) has <b style="color: red;">FAILED</b>.</p>
+                    <p>Please check the console output for details: <a href='${env.BUILD_URL}'>${env.JOB_NAME} #${env.BUILD_NUMBER} Console Output</a></p>
+                    <p>Access the Allure Report (if generated): <a href='${env.BUILD_URL}allure/'>${params.PROJECT_NAME} Allure Report</a></p>
+                    <p>Best regards,<br>Your Jenkins CI Server</p>
                 """,
                 to: params.RECIPIENTS,
                 replyTo: params.REPLY_TO,
@@ -60,16 +108,21 @@ pipeline {
             )
         }
 
+        // 'success' block runs only if the pipeline succeeds
         success {
             emailext(
-                subject: "Build SUCCESS - ${params.PROJECT_NAME}",
+                subject: "Build SUCCESS - ${params.PROJECT_NAME} #${env.BUILD_NUMBER}",
                 body: """
-                    <p>Build succeeded. Check the report: <a href='${env.BUILD_URL}'>${env.JOB_NAME} #${env.BUILD_NUMBER}</a></p>
+                    <p>Hello Team,</p>
+                    <p>The Jenkins build for <b>${params.PROJECT_NAME}</b> (Build #${env.BUILD_NUMBER}) has <b style="color: green;">SUCCEEDED</b>!</p>
+                    <p>Access the Allure Report: <a href='${env.BUILD_URL}allure/'>${params.PROJECT_NAME} Allure Report</a></p>
+                    <p>View the Jenkins Job: <a href='${env.BUILD_URL}'>${env.JOB_NAME} #${env.BUILD_NUMBER}</a></p>
+                    <p>Best regards,<br>Your Jenkins CI Server</p>
                 """,
                 to: params.RECIPIENTS,
                 replyTo: params.REPLY_TO,
                 mimeType: 'text/html'
             )
         }
-    }
-}
+    } // Closes post block for the entire pipeline
+} // Closes pipeline block (This must be the very last character in the file)
