@@ -21,7 +21,11 @@ pipeline {
             dir('ForthErp') {
 
                     echo "Running tests with mvn clean test -DsuiteXmlFile=../testng.xml"
-                    bat 'mvn clean test "-DsuiteXmlFile=../testng.xml"'
+                    script {
+                    withMaven(maven: 'Maven 3.6.8') {
+                         bat 'mvn clean test "-DsuiteXmlFile=../testng.xml"'
+                    }
+
                     bat 'dir allure-results /s /b'
                     }
 
