@@ -5,7 +5,7 @@ pipeline {
         string(name: 'RECIPIENTS', defaultValue: 'muhammedhashin16@gmail.com', description: 'Email recipients')
         string(name: 'PROJECT_NAME', defaultValue: 'AutomationExercise', description: 'Project name')
         string(name: 'REPORT_SRC', defaultValue: 'ForthErp/allure-results', description: 'Allure results folder')
-        string(name: 'TESTNG_XML', defaultValue: 'src/test/resources/testng.xml', description: 'Path to TestNG XML suite file')
+        string(name: 'TESTNG_XML', defaultValue: 'testng.xml', description: 'Path to TestNG XML suite file')
         string(name: 'REPLY_TO', defaultValue: 'muhammedhashin16@gmail.com', description: 'Reply-to email')
     }
 
