@@ -23,49 +23,44 @@ pipeline {
         }
 
         // Stage 2: Run the automated tests using Maven and TestNG
-        stage('Run Tests') {
-                    steps {
-                        dir('ForthErp') {
-                            echo "Running tests with Maven. TestNG XML file:../${params.TESTNG_XML}"
-                            script {
-                                def mavenOutput = ""
-                                def mavenExitCode = 1 // Assume failure by default
+       stage('Run Tests') {
+                   steps {
+                       dir('ForthErp') {
+                           echo "Running tests with Maven. TestNG XML file:../${params.TESTNG_XML}"
+                           script {
+                               def mavenResult // Declare as a variable to hold the map
 
-                                try {
-                                    withMaven(maven: 'Maven') { // Confirmed 'Maven' is the correct name
-                                        // Execute Maven and capture its standard output
-                                        // The bat command with returnStdout: true should return the stdout directly as a String
-                                        mavenOutput = bat(
-                                            script: "mvn clean test \"-DsuiteXmlFile=../${params.TESTNG_XML}\"",
-                                            returnStdout: true
-                                        ).trim() // .trim() removes leading/trailing whitespace/newlines
+                               try {
+                                  withMaven(maven: 'Maven') {
+                                      // This is the robust way to capture stdout AND status from bat
+                                      mavenResult = bat(
+                                          script: "mvn clean test \"-DsuiteXmlFile=../${params.TESTNG_XML}\"",
+                                          returnStdout: true, // Capture standard output
+                                          returnStatus: true  // Capture the exit code
+                                      )
+                                  }
+                               } catch(Exception e) {
+                                   // If the bat command itself throws an exception (e.g., command not found, or pipeline error)
+                                   // We still want to capture what it *did* output before failing.
+                                   echo "ERROR: Maven command execution failed with an exception: ${e.message}"
+                                   // Attempt to get whatever stdout was available
+                                   mavenResult = [stdout: e.message, status: 1] // Create a map with error details
+                               }
 
-                                        // The exit code is also captured if returnStatus is true, but sometimes the combination causes issues
-                                        // For now, let's assume if bat doesn't throw an error, it ran, and we'll check output for success/failure
-                                        // A more robust way would be to still get returnStatus but let's debug the stdout first.
-                                        mavenExitCode = 0 // If we reached here without exception, assume success initially
-                                    }
-                                } catch (Exception e) {
-                                    echo "ERROR: Maven command execution failed: ${e.message}"
-                                    mavenOutput = "Maven command failed with exception: ${e.message}"
-                                    mavenExitCode = 1 // Mark as failed
-                                }
+                               echo "--- Maven Command Full Output ---"
+                               echo "${mavenResult.stdout}" // Now this should correctly access the stdout field
+                               echo "--- End Maven Command Full Output ---"
 
-                                echo "--- Maven Command Full Output ---"
-                                echo "${mavenOutput}"
-                                echo "--- End Maven Command Full Output ---"
-
-                                // Basic check for success keywords in output if exit code isn't reliably available
-                                if (mavenExitCode != 0 || mavenOutput.contains("BUILD FAILURE") || !mavenOutput.contains("BUILD SUCCESS")) {
-                                    error "Maven tests did not complete successfully or reported failures. Exit Code: ${mavenExitCode}"
-                                } else {
-                                    echo "Maven tests completed successfully."
-                                }
-                            } // Closes script block
-                        }
-                    }
-                }
-
+                               // Check Maven's actual exit status
+                               if (mavenResult.status != 0) {
+                                   error "Maven tests did not complete successfully. Exit Code: ${mavenResult.status}"
+                               } else {
+                                   echo "Maven tests completed successfully."
+                               }
+                           } // Closes script block
+                       }
+                   }
+               }
 
         // Stage 3: Generate the Allure HTML report from raw results
        stage('Generate Allure Report') {
