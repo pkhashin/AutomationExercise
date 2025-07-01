@@ -1,146 +1,86 @@
-// Jenkinsfile for AutomationExercise Project
+// Jenkinsfile (Declarative Pipeline)
 
 pipeline {
-    agent any // Specifies that the pipeline can run on any available agent
-
-    // Define parameters for the pipeline, allowing user input at build time
-    parameters {
-        string(name: 'RECIPIENTS', defaultValue: 'muhammedhashin16@gmail.com', description: 'Email recipients for notifications')
-        string(name: 'PROJECT_NAME', defaultValue: 'AutomationExercise', description: 'Name of the project for reports and notifications')
-        string(name: 'REPORT_SRC', defaultValue: 'ForthErp/allure-report', description: 'Folder where the Allure HTML report will be generated')
-        string(name: 'TESTNG_XML', defaultValue: 'testng.xml', description: 'Filename of the TestNG XML suite file (expected in repository root)')
-        string(name: 'REPLY_TO', defaultValue: 'muhammedhashin16@gmail.com', description: 'Reply-to email address for notifications')
-        string(name: 'ALLURE_RESULTS_DIR', defaultValue: 'ForthErp/allure-results', description: 'Folder where Allure raw test results are stored by Maven')
+    
+    agent any
+    tools {
+        maven 'M3.8.8' // Name configured in Jenkins for Maven 3.8.8
+        jdk 'JDK17'    // Name configured in Jenkins for JDK 17
     }
 
-    // Define the stages of your pipeline
+    // Environment variables (optional, but good for consistency)
+    environment {
+        // This ensures Maven's local repository is cached for faster builds
+        MAVEN_OPTS = "-Dmaven.repo.local=${env.WORKSPACE}/.m2/repository"
+        // Point Allure to the correct results directory
+        ALLURE_RESULTS_DIR = "target/allure-results"
+    }
+
+    // Cache Maven dependencies to speed up subsequent builds
+    options {
+        // Cache Maven .m2 repository
+        // Make sure this path corresponds to the MAVEN_OPTS setting above
+        // For 'agent any', this might require sticky workspaces or shared agents.
+        // For dedicated agents, this is very effective.
+        // If your Jenkins setup clears workspaces frequently, this cache might not be effective.
+        // You might need to configure global Maven settings for a shared repo if agents are ephemeral.
+        skipDefaultCheckout() // Will perform explicit checkout in a stage
+    }
+
     stages {
-        // Stage 1: Checkout the source code from Git
-        stage('Checkout Source Code') { // Renamed for clarity
+        stage('Checkout Code') {
             steps {
-                checkout scm // Standard step to checkout the project from the SCM defined in job configuration
+                echo 'Checking out source code from Git...'
+                git branch: 'master', url: 'https://github.com/pkhashin/AutomationExercise.git'
             }
         }
 
-        // Stage 2: Run the automated tests using Maven and TestNG
-       stage('Run Tests') {
-                   steps {
-                       dir('ForthErp') {
-                           echo "Running tests with Maven. TestNG XML file:../${params.TESTNG_XML}"
-                           script {
-                               def mavenResult // Declare as a variable to hold the map
+        stage('Build and Test') {
+            steps {
+                echo 'Building project and running Selenium tests with Maven...'
+                // The 'test' goal runs your TestNG tests.
+                // -Dallure.results.directory tells Allure where to store its raw test data.
+                // It uses the ALLURE_RESULTS_DIR environment variable defined above.
+                sh "mvn clean test -Dallure.results.directory=${ALLURE_RESULTS_DIR}"
+            }
+        }
 
-                               try {
-                                  withMaven(maven: 'Maven') {
-                                      // This is the robust way to capture stdout AND status from bat
-                                      mavenResult = bat(
-                                          script: "mvn clean test \"-DsuiteXmlFile=../${params.TESTNG_XML}\"",
-                                          returnStdout: true, // Capture standard output
-                                          returnStatus: true  // Capture the exit code
-                                      )
-                                  }
-                               } catch(Exception e) {
-                                   // If the bat command itself throws an exception (e.g., command not found, or pipeline error)
-                                   // We still want to capture what it *did* output before failing.
-                                   echo "ERROR: Maven command execution failed with an exception: ${e.message}"
-                                   // Attempt to get whatever stdout was available
-                                   mavenResult = [stdout: e.message, status: 1] // Create a map with error details
-                               }
-
-                               echo "--- Maven Command Full Output ---"
-                               echo "${mavenResult.stdout}" // Now this should correctly access the stdout field
-                               echo "--- End Maven Command Full Output ---"
-
-                               // Check Maven's actual exit status
-                               if (mavenResult.status != 0) {
-                                   error "Maven tests did not complete successfully. Exit Code: ${mavenResult.status}"
-                               } else {
-                                   echo "Maven tests completed successfully."
-                               }
-                           } // Closes script block
-                       }
-                   }
-               }
-
-        // Stage 3: Generate the Allure HTML report from raw results
-       stage('Generate Allure Report') {
-           steps {
-               // Change directory back to the Maven project root where allure-results are found
-               dir('ForthErp') {
-                   echo "Generating Allure HTML report from raw results..."
-                   script {
-                       // 'withAllure' ensures the Allure command-line tool is available in PATH
-                       // Replace 'Allure' with the exact name from Jenkins Global Tool Configuration
-                       withAllure('Allure') { // This step requires the Allure Jenkins Plugin
-                           // Command to generate HTML report:
-                           // '--clean' removes previous report, '-o' specifies output directory
-                           bat "allure generate --clean \"${params.ALLURE_RESULTS_DIR}\" -o \"${params.REPORT_SRC}\""
-                       } // Closes withAllure block
-                   } // Closes script block
-               } // Closes dir('ForthErp') block
-           } // Closes steps block
-           // Post-actions specific to this stage (e.g., archiving raw results)
-           post {
-               always {
-                   dir('ForthErp') {
-                       echo "Archiving Allure raw results..."
-                       // Archive the raw results for later inspection or regeneration
-                       archiveArtifacts artifacts: "${params.ALLURE_RESULTS_DIR}/**", allowEmptyArchive: true
-                   }
-               }
-           } // Closes post for Generate Allure Report stage
-       } // Closes stage('Generate Allure Report') block
-
-    } // Closes stages block
-
-    // Define post-build actions that run after all stages are complete
-    post {
-        // 'always' block runs regardless of stage success or failure
-        always {
-            script {
-                echo "Publishing HTML report and sending email notifications..."
-                // Publish the generated Allure HTML report on the Jenkins build page
-                publishHTML(target: [
-                    reportDir: params.REPORT_SRC, // This should point to ForthErp/allure-report
-                    reportFiles: 'index.html',     // The main HTML file to display
-                    reportName: "Allure Report - ${params.PROJECT_NAME}", // Name displayed in Jenkins UI
-                    keepAll: true                  // Keep reports for all builds
+        stage('Generate Allure Report') {
+            // This stage will run even if the 'Build and Test' stage fails,
+            // so you always get a report (even for failed tests).
+            when {
+                // 'currentBuild.result' checks the result of the current pipeline run so far
+                // 'SUCCESS' is when all previous stages passed. 'UNSTABLE' might mean tests failed but build completed.
+                // We use 'currentBuild.result != null' to ensure it runs after build completes, regardless of its status.
+                expression { currentBuild.result != null }
+            }
+            steps {
+                echo 'Generating Allure Report...'
+                // This 'allure' step is provided by the Allure Jenkins Plugin.
+                // It takes the raw results from ALLURE_RESULTS_DIR and generates the HTML report.
+                allure([
+                    reportBuildPolicy: 'ALWAYS', // Generate report always, even on failures
+                    results: [[path: ALLURE_RESULTS_DIR]] // Path to the raw Allure results
                 ])
-            } // Closes script block
-        } // Closes always block
-
-        // 'failure' block runs only if the pipeline fails
-        failure {
-            emailext(
-                subject: "Build FAILED - ${params.PROJECT_NAME} #${env.BUILD_NUMBER}",
-                body: """
-                    <p>Hello Team,</p>
-                    <p>The Jenkins build for <b>${params.PROJECT_NAME}</b> (Build #${env.BUILD_NUMBER}) has <b style="color: red;">FAILED</b>.</p>
-                    <p>Please check the console output for details: <a href='${env.BUILD_URL}'>${env.JOB_NAME} #${env.BUILD_NUMBER} Console Output</a></p>
-                    <p>Access the Allure Report (if generated): <a href='${env.BUILD_URL}allure/'>${params.PROJECT_NAME} Allure Report</a></p>
-                    <p>Best regards,<br>Your Jenkins CI Server</p>
-                """,
-                to: params.RECIPIENTS,
-                replyTo: params.REPLY_TO,
-                mimeType: 'text/html'
-            )
+            }
         }
+    }
 
-        // 'success' block runs only if the pipeline succeeds
+    // Post-build actions that run after all stages are complete
+    post {
+        always {
+            echo 'Pipeline finished.'
+            // You can add cleanup steps here if needed
+        }
         success {
-            emailext(
-                subject: "Build SUCCESS - ${params.PROJECT_NAME} #${env.BUILD_NUMBER}",
-                body: """
-                    <p>Hello Team,</p>
-                    <p>The Jenkins build for <b>${params.PROJECT_NAME}</b> (Build #${env.BUILD_NUMBER}) has <b style="color: green;">SUCCEEDED</b>!</p>
-                    <p>Access the Allure Report: <a href='${env.BUILD_URL}allure/'>${params.PROJECT_NAME} Allure Report</a></p>
-                    <p>View the Jenkins Job: <a href='${env.BUILD_URL}'>${env.JOB_NAME} #${env.BUILD_NUMBER}</a></p>
-                    <p>Best regards,<br>Your Jenkins CI Server</p>
-                """,
-                to: params.RECIPIENTS,
-                replyTo: params.REPLY_TO,
-                mimeType: 'text/html'
-            )
+            echo 'Selenium tests passed successfully! 🎉'
+            // Add notifications for success (e.g., Slack, Email)
+            // slackSend channel: '#your-slack-channel', message: "SUCCESS: Build ${env.BUILD_NUMBER} for ${env.JOB_NAME} passed!"
         }
-    } // Closes post block for the entire pipeline
-} // Closes pipeline block (This must be the very last character in the file)
+        failure {
+            echo 'Selenium tests failed! 💔 Check the Allure Report for details.'
+            // Add notifications for failure (e.g., Slack, Email)
+            // slackSend channel: '#your-slack-channel', message: "FAILURE: Build ${env.BUILD_NUMBER} for ${env.JOB_NAME} failed!"
+        }
+    }
+}
