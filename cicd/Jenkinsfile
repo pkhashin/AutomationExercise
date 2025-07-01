@@ -45,7 +45,7 @@ pipeline {
             ])
         }
         success {
-            echo 'Selenium tests passed successfully!
+            echo 'Selenium tests passed successfully!'
         }
         failure {
             echo 'Selenium tests failed!Check the Allure Report for details.'
