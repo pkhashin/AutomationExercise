@@ -1,30 +1,20 @@
 // Jenkinsfile (Declarative Pipeline)
 
 pipeline {
-    
     agent any
+
     tools {
         maven 'M3.8.8' // Name configured in Jenkins for Maven 3.8.8
         jdk 'JDK17'    // Name configured in Jenkins for JDK 17
     }
 
-    // Environment variables (optional, but good for consistency)
     environment {
-        // This ensures Maven's local repository is cached for faster builds
         MAVEN_OPTS = "-Dmaven.repo.local=${env.WORKSPACE}/.m2/repository"
-        // Point Allure to the correct results directory
         ALLURE_RESULTS_DIR = "target/allure-results"
     }
 
-    // Cache Maven dependencies to speed up subsequent builds
     options {
-        // Cache Maven .m2 repository
-        // Make sure this path corresponds to the MAVEN_OPTS setting above
-        // For 'agent any', this might require sticky workspaces or shared agents.
-        // For dedicated agents, this is very effective.
-        // If your Jenkins setup clears workspaces frequently, this cache might not be effective.
-        // You might need to configure global Maven settings for a shared repo if agents are ephemeral.
-        skipDefaultCheckout() // Will perform explicit checkout in a stage
+        skipDefaultCheckout()
     }
 
     stages {
@@ -38,49 +28,34 @@ pipeline {
         stage('Build and Test') {
             steps {
                 echo 'Building project and running Selenium tests with Maven...'
-                // The 'test' goal runs your TestNG tests.
-                // -Dallure.results.directory tells Allure where to store its raw test data.
-                // It uses the ALLURE_RESULTS_DIR environment variable defined above.
-                sh "mvn clean test -Dallure.results.directory=${ALLURE_RESULTS_DIR}"
+                // --- CHANGE THIS LINE FROM 'sh' TO 'bat' ---
+                bat "mvn clean test -Dallure.results.directory=${ALLURE_RESULTS_DIR}"
             }
         }
 
         stage('Generate Allure Report') {
-            // This stage will run even if the 'Build and Test' stage fails,
-            // so you always get a report (even for failed tests).
             when {
-                // 'currentBuild.result' checks the result of the current pipeline run so far
-                // 'SUCCESS' is when all previous stages passed. 'UNSTABLE' might mean tests failed but build completed.
-                // We use 'currentBuild.result != null' to ensure it runs after build completes, regardless of its status.
                 expression { currentBuild.result != null }
             }
             steps {
                 echo 'Generating Allure Report...'
-                // This 'allure' step is provided by the Allure Jenkins Plugin.
-                // It takes the raw results from ALLURE_RESULTS_DIR and generates the HTML report.
                 allure([
-                    reportBuildPolicy: 'ALWAYS', // Generate report always, even on failures
-                    results: [[path: ALLURE_RESULTS_DIR]] // Path to the raw Allure results
+                    reportBuildPolicy: 'ALWAYS',
+                    results: [[path: ALLURE_RESULTS_DIR]]
                 ])
             }
         }
     }
 
-    // Post-build actions that run after all stages are complete
     post {
         always {
             echo 'Pipeline finished.'
-            // You can add cleanup steps here if needed
         }
         success {
             echo 'Selenium tests passed successfully! 🎉'
-            // Add notifications for success (e.g., Slack, Email)
-            // slackSend channel: '#your-slack-channel', message: "SUCCESS: Build ${env.BUILD_NUMBER} for ${env.JOB_NAME} passed!"
         }
         failure {
             echo 'Selenium tests failed! 💔 Check the Allure Report for details.'
-            // Add notifications for failure (e.g., Slack, Email)
-            // slackSend channel: '#your-slack-channel', message: "FAILURE: Build ${env.BUILD_NUMBER} for ${env.JOB_NAME} failed!"
         }
     }
 }
