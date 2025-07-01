@@ -45,7 +45,7 @@ pipeline {
             ])
         }
        success {
-            echo 'Selenium tests passed successfully!
+            echo 'Selenium tests passed successfully!'
             // --- ADD THIS SECTION FOR SUCCESS EMAIL ---
             emailext (
                 subject: "SUCCESS: ${env.JOB_NAME} Build #${env.BUILD_NUMBER} - Automation Tests Passed",
