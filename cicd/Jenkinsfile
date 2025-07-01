@@ -44,11 +44,58 @@ pipeline {
                 results: [[path: ALLURE_RESULTS_DIR]] // Path to the raw Allure results
             ])
         }
-        success {
-            echo 'Selenium tests passed successfully!'
+       success {
+            echo 'Selenium tests passed successfully!
+            // --- ADD THIS SECTION FOR SUCCESS EMAIL ---
+            emailext (
+                subject: "SUCCESS: ${env.JOB_NAME} Build #${env.BUILD_NUMBER} - Automation Tests Passed",
+                body: """
+                    Hello Team,
+
+                    The Selenium automation tests for ${env.JOB_NAME} Build #${env.BUILD_NUMBER} have passed successfully!
+
+                    You can view the detailed Allure Report here:
+                    ${env.BUILD_URL}allure/
+
+                    Build URL: ${env.BUILD_URL}
+
+                    Best regards,
+                    Jenkins Automation
+                """,
+                to: 'muhammedhashin16@gmail.com, // Replace with actual email addresses
+                // Add more recipients as needed (cc, bcc)
+                // cc: 'qa-lead@example.com',
+                // attachLog: true // Attach console output log
+            )
+            // ----------------------------------------
         }
         failure {
-            echo 'Selenium tests failed!Check the Allure Report for details.'
+            echo 'Selenium tests failed! Check the Allure Report for details.'
+            // --- ADD THIS SECTION FOR FAILURE EMAIL ---
+            emailext (
+                subject: "FAILURE: ${env.JOB_NAME} Build #${env.BUILD_NUMBER} - Selenium Tests Failed",
+                body: """
+                    Hello Team,
+
+                    The Selenium automation tests for ${env.JOB_NAME} Build #${env.BUILD_NUMBER} have FAILED.
+
+                    Please review the console output for errors:
+                    ${env.BUILD_URL}console
+
+                    You can view the detailed Allure Report here:
+                    ${env.BUILD_URL}allure/
+
+                    Build URL: ${env.BUILD_URL}
+
+                    Best regards,
+                    Jenkins Automation
+                """,
+                to: 'stakeholder1@example.com, stakeholder2@example.com', // Replace with actual email addresses
+                // Add more recipients as needed (cc, bcc)
+                // cc: 'dev-team@example.com',
+                // attachLog: true // Attach console output log
+            )
+            // ----------------------------------------
         }
     }
 }
