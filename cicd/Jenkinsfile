@@ -62,7 +62,7 @@ pipeline {
                     Best regards,
                     Jenkins Automation
                 """,
-                to: 'muhammedhashin16@gmail.com', // Replace with actual email addresses
+                to: 'stakeholder1@example.com', // Replace with actual email addresses
                 // Add more recipients as needed (cc, bcc)
                 // cc: 'qa-lead@example.com',
                 // attachLog: true // Attach console output log
