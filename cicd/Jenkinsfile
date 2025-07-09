@@ -32,8 +32,8 @@ stage('SonarQube Analysis') {
                 withSonarQubeEnv('MySonarQube') {  // Name must match in Jenkins > SonarQube config
                     bat '''
                         mvn clean verify sonar:sonar ^
-                          -Dsonar.projectKey=ForthErp ^
-                          -Dsonar.projectName=ForthErp ^
+                          -Dsonar.projectKey=AutomationExcercise ^
+                          -Dsonar.projectName=AutomationExcercise ^
                           -Dsonar.sources=src ^
                           -Dsonar.java.binaries=target/classes
                     '''
