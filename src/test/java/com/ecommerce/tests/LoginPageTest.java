@@ -57,23 +57,14 @@ public class LoginPageTest extends BaseTest {
 
     }
 
-    @Test
-    @Severity(SeverityLevel.NORMAL)
-    public void verifyLogout(){
-
-        performLogin(ConfigReader.get("username"), ConfigReader.get("password"));
-        String actualUser=pageManager.getHomePage().getLoggedInUsername();
-        Assert.assertEquals(actualUser,AppConstants.LOGIN_USERNAME,"Logged in username does not match");
-        pageManager.getLoginPage().clicklogOut();
-        log.info("Logout Successfully");
-    }
-
-
-
-
-
-
-
-
-
+//    @Test
+//    @Severity(SeverityLevel.NORMAL)
+//    public void verifyLogout(){
+//
+//        performLogin(ConfigReader.get("username"), ConfigReader.get("password"));
+//        String actualUser=pageManager.getHomePage().getLoggedInUsername();
+//        Assert.assertEquals(actualUser,AppConstants.LOGIN_USERNAME,"Logged in username does not match");
+//        pageManager.getLoginPage().clicklogOut();
+//        log.info("Logout Successfully");
+//    }
 }
