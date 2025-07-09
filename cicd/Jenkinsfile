@@ -12,6 +12,7 @@ pipeline {
     environment {
         MAVEN_OPTS = "-Dmaven.repo.local=${env.WORKSPACE}/.m2/repository"
         ALLURE_RESULTS_DIR = "target/allure-results"
+        SONAR_SCANNER_HOME = tool 'SonarScanner'
     }
 
     options {
@@ -26,6 +27,19 @@ pipeline {
             }
         }
 
+stage('SonarQube Analysis') {
+            steps {
+                withSonarQubeEnv('MySonarQube') {  // Name must match in Jenkins > SonarQube config
+                    bat '''
+                        mvn clean verify sonar:sonar ^
+                          -Dsonar.projectKey=ForthErp ^
+                          -Dsonar.projectName=ForthErp ^
+                          -Dsonar.sources=src ^
+                          -Dsonar.java.binaries=target/classes
+                    '''
+                }
+            }
+        }
         stage('Build and Test') {
             steps {
                 echo 'Building project and running Selenium tests with Maven...'
