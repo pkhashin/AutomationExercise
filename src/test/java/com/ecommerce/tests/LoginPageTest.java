@@ -3,18 +3,17 @@ package com.ecommerce.tests;
 import com.ecommerce.base.BaseTest;
 import com.ecommerce.config.ConfigReader;
 import com.ecommerce.constants.AppConstants;
-import com.ecommerce.pages.LoginPage;
-import com.ecommerce.utils.AllureListener;
+import com.ecommerce.utils.JsonReader;
 import io.qameta.allure.Severity;
 import io.qameta.allure.SeverityLevel;
 import io.qameta.allure.Step;
-import jdk.jfr.Description;
 import lombok.extern.slf4j.Slf4j;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.testng.Assert;
-import org.testng.annotations.Listeners;
 import org.testng.annotations.Test;
+
+import java.util.Map;
 
 @Slf4j
 public class LoginPageTest extends BaseTest {
@@ -23,7 +22,6 @@ public class LoginPageTest extends BaseTest {
     @Step("Login with username: {username} and password: ******")
     public void performLogin(String username,String password){
 
-        pageManager.getLoginPage().clickSignUpButton();
         Assert.assertTrue(pageManager.getLoginPage().headerTextIsDisplayed(),"Header not displayed on login page ");
         pageManager.getLoginPage().login(username,password);
         pageManager.getLoginPage().clickLoginButton();
@@ -40,6 +38,7 @@ public class LoginPageTest extends BaseTest {
         performLogin(ConfigReader.get("username"), ConfigReader.get("password"));
 
         String actualUser=pageManager.getHomePage().getLoggedInUsername();
+        log.info("Actual logged in user: {}", actualUser);
         Assert.assertEquals(actualUser,AppConstants.LOGIN_USERNAME,"Logged in username does not match");
 
         log.info("Login successful. Verified username: {}", actualUser);
@@ -53,6 +52,17 @@ public class LoginPageTest extends BaseTest {
 
         String actualText=pageManager.getLoginPage().getLoginErrorText();
         Assert.assertEquals(actualText,AppConstants.LOGIN_ERROR_TEXT,"Error text is not displayed");
+
+
+    }
+
+
+    @Test
+    public void doLoginTest(){
+        Map<String, String> loginCredentials= JsonReader.readJsonFile(BaseTest.loginCredentialsJsonPath);
+        performLogin(loginCredentials.get("email"), loginCredentials.get("password"));
+        String actualUser=pageManager.getHomePage().getLoggedInUsername();
+        log.info("Login successful. Verified username: {}", actualUser);
 
 
     }

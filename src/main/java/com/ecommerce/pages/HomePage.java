@@ -1,6 +1,6 @@
 package com.ecommerce.pages;
 
-import com.ecommerce.core.ElementActions;
+import com.ecommerce.driverManager.ElementActions;
 import com.ecommerce.pages.repo.HomeRepo;
 import io.qameta.allure.Step;
 import org.openqa.selenium.WebDriver;

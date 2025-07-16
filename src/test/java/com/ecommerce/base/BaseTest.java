@@ -1,10 +1,8 @@
 package com.ecommerce.base;
 
-import com.ecommerce.core.DriverManager;
-import com.ecommerce.core.PageManager;
+import com.ecommerce.driverManager.DriverManager;
+import com.ecommerce.driverManager.PageManager;
 import com.ecommerce.utils.AllureListener;
-import com.ecommerce.utils.ScreenshotUtil;
-import io.qameta.allure.Allure;
 import lombok.extern.slf4j.Slf4j;
 import org.openqa.selenium.WebDriver;
 import org.slf4j.Logger;
@@ -13,14 +11,11 @@ import org.testng.ITestResult;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
 
-import java.io.ByteArrayInputStream;
-
-import static com.ecommerce.utils.AllureListener.attachScreenshot;
-
 
 @Slf4j
 public class BaseTest {
     private static final Logger log = LoggerFactory.getLogger(BaseTest.class);
+    protected final static String loginCredentialsJsonPath= "src/test/resources/testData/loginCredentials.json";
     protected DriverManager driverManager;
     protected WebDriver driver;
     protected PageManager pageManager;

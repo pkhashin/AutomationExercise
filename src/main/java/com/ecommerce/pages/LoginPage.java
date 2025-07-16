@@ -1,6 +1,6 @@
 package com.ecommerce.pages;
 
-import com.ecommerce.core.ElementActions;
+import com.ecommerce.driverManager.ElementActions;
 import com.ecommerce.constants.AppConstants;
 import com.ecommerce.pages.repo.LoginRepo;
 import io.qameta.allure.Step;
@@ -17,7 +17,9 @@ public class LoginPage extends LoginRepo {
 
 
     public LoginPage(WebDriver driver) {
+
         eleUtil = new ElementActions(driver);
+
     }
 
     @Step("Click on SignUp button")
@@ -26,15 +28,16 @@ public class LoginPage extends LoginRepo {
         eleUtil.click(btnSignUp);
     }
 
+
     @Step("Enter the username:{username}")
-    public void enterUsername(String userName){
+    public void enterUsername(String userName) {
         log.info("Entering the username : {}", userName);
         eleUtil.sendKeys(txtUsername, userName);
     }
 
     @Step("Enter the password:******")
-    public void enterPassword(String password){
-        log.info("Entering the password : {}", password  );
+    public void enterPassword(String password) {
+        log.info("Entering the password : {}", password);
         eleUtil.sendKeys(txtPassword, password);
     }
 
@@ -45,15 +48,16 @@ public class LoginPage extends LoginRepo {
     }
 
     public void login(String username, String password) {
-      enterUsername(username);
-      enterPassword(password);
+        enterUsername(username);
+        enterPassword(password);
     }
 
 
-    public void clicklogOut(){
+    public void clicklogOut() {
         log.info("Clicked on the logout button");
         eleUtil.click(btnLogOut);
     }
+
     @Step("Click on Login button")
     public void clickLoginButton() {
         log.info("Clicked on the login button");
@@ -69,9 +73,10 @@ public class LoginPage extends LoginRepo {
 
     @Step("Verify the login error text")
     public String getLoginErrorText() {
-       return eleUtil.getText(errortxtLogin);
+        return eleUtil.getText(errortxtLogin);
 
     }
+
 
 }
 

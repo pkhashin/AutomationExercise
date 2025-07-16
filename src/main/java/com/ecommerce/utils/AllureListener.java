@@ -1,14 +1,11 @@
 package com.ecommerce.utils;
 
-import com.ecommerce.core.DriverManager;
+import com.ecommerce.driverManager.DriverManager;
 import io.qameta.allure.Allure;
 import lombok.extern.slf4j.Slf4j;
-import org.openqa.selenium.OutputType;
-import org.openqa.selenium.TakesScreenshot;
 import org.openqa.selenium.WebDriver;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.testng.ITestContext;
 import org.testng.ITestListener;
 import org.testng.ITestResult;
 
