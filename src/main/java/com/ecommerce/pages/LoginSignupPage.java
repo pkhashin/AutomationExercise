@@ -2,7 +2,7 @@ package com.ecommerce.pages;
 
 import com.ecommerce.driverManager.ElementActions;
 import com.ecommerce.constants.AppConstants;
-import com.ecommerce.pages.repo.LoginRepo;
+import com.ecommerce.pages.repo.LoginSignUpRepo;
 import io.qameta.allure.Step;
 import lombok.extern.slf4j.Slf4j;
 import org.openqa.selenium.WebDriver;
@@ -11,13 +11,13 @@ import org.slf4j.LoggerFactory;
 
 
 @Slf4j
-public class LoginPage extends LoginRepo {
-    private static final Logger log = LoggerFactory.getLogger(LoginPage.class);
+public class LoginSignupPage extends LoginSignUpRepo {
+    private static final Logger log = LoggerFactory.getLogger(LoginSignupPage.class);
     private final ElementActions eleUtil;
+    private WebDriver driver;
 
-
-    public LoginPage(WebDriver driver) {
-
+    public LoginSignupPage(WebDriver driver) {
+        this.driver = driver;
         eleUtil = new ElementActions(driver);
 
     }
@@ -47,15 +47,11 @@ public class LoginPage extends LoginRepo {
         return isDisplayed;
     }
 
-    public void login(String username, String password) {
+    public UserAccountPage login(String username, String password) {
         enterUsername(username);
         enterPassword(password);
-    }
-
-
-    public void clicklogOut() {
-        log.info("Clicked on the logout button");
-        eleUtil.click(btnLogOut);
+        clickLoginButton();
+       return new UserAccountPage(driver);
     }
 
     @Step("Click on Login button")
@@ -76,6 +72,20 @@ public class LoginPage extends LoginRepo {
         return eleUtil.getText(errortxtLogin);
 
     }
+
+    @Step("Enter the username:{username}")
+    public RegisterUserPage fillSignup(String username, String email) {
+
+        eleUtil.sendKeys(txtSignUpUsername,username);
+        eleUtil.sendKeys(textSignUpEmail, email);
+        eleUtil.click(btnSignUp);
+        return new RegisterUserPage(driver);
+    }
+
+    public boolean NewUserSignupTextIsDisplayed() {
+        return eleUtil.getText(txtNewUserSignup).equalsIgnoreCase("New User Signup!");
+    }
+
 
 
 }

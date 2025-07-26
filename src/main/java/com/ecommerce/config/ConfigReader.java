@@ -16,7 +16,7 @@ public class ConfigReader {
     public static Properties initProp() {
         if (!isLoaded)
             try {
-                FileInputStream fis = new FileInputStream("src/test/resources/config/config.properties");
+                FileInputStream fis = new FileInputStream("src/main/resources/config.properties");
                 prop.load(fis);
                 isLoaded = true;
                 log.info("Configuration properties loaded successfully.");

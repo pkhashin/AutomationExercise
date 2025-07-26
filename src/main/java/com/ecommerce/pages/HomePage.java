@@ -11,15 +11,34 @@ public class HomePage extends HomeRepo {
 
     private static final Logger log = LoggerFactory.getLogger(HomePage.class);
     private final ElementActions eleUtil;
+    private WebDriver driver;
 
     public HomePage(WebDriver driver) {
-        //this.driver = driver;
+        this.driver = driver;
         eleUtil = new ElementActions(driver);
     }
 
-    @Step("Verify the homepage is displayed having logged in user name displayed")
-    public String getLoggedInUsername(){
-        return eleUtil.waitForVisibilityOfElement(txtLoggedInUserName).getText();
+
+
+
+
+
+    public boolean verifyHomePageIsDisplayed() {
+
+        eleUtil.isDisplayed(linkHome);
+        eleUtil.isDisplayed(linkProducts);
+        eleUtil.isDisplayed(linkCart);
+        eleUtil.isDisplayed(linkSignupLogin);
+        log.info("Home page is displayed with all the links");
+        return true;
     }
+
+    public LoginSignupPage clickLoginSignupLink() {
+        log.info("Clicking on the Signup/Login link");
+        eleUtil.click(linkSignupLogin);
+        return new LoginSignupPage(driver);
+    }
+
+
 
 }

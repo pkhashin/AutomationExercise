@@ -7,10 +7,13 @@ import java.io.File;
 import java.util.Map;
 
 public class JsonReader {
-    public static Map<String, String> readJsonFile(String filepath) {
+
+    private static final String testDataFilePath = "src/test/resources/testData/";
+    public static Map<String, String> readJsonFile(String fileName) {
         ObjectMapper mapper = new ObjectMapper();
         try {
-            return mapper.readValue(new File(filepath),new TypeReference<Map<String, String>>() {});
+            File file=new File(testDataFilePath + fileName);
+            return mapper.readValue(file,new TypeReference<Map<String, String>>() {});
         } catch (Exception e) {
             throw new RuntimeException("Failed to read test data", e);
         }
