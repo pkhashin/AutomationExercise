@@ -1,8 +1,9 @@
 package com.ecommerce.pages;
 
 
-import com.ecommerce.driverManager.ElementActions;
+
 import com.ecommerce.pages.repo.SignUpRepo;
+import com.ecommerce.utils.ElementActions;
 import com.github.javafaker.Faker;
 import org.openqa.selenium.WebDriver;
 import org.slf4j.Logger;

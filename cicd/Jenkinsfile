@@ -1,102 +1,35 @@
-// Jenkinsfile (Declarative Pipeline)
-
 pipeline {
     agent any
 
-    tools {
-        maven 'M3.8.8' // Name configured in Jenkins for Maven 3.8.8
-        jdk 'JDK17'    // Name configured in Jenkins for JDK 17
-        allure 'Allure_CLI'
-    }
-
-    environment {
-        MAVEN_OPTS = "-Dmaven.repo.local=${env.WORKSPACE}/.m2/repository"
-        ALLURE_RESULTS_DIR = "target/allure-results"
-    }
-
-    options {
-        skipDefaultCheckout()
-    }
-
     stages {
-        stage('Checkout Code') {
+        stage('Checkout') {
             steps {
-                echo 'Checking out source code from Git...'
-                git branch: 'master', url: 'https://github.com/pkhashin/AutomationExercise.git'
+                git branch: 'main', url: 'https://github.com/pkhashin/Playwright-Automation'
             }
         }
 
-
-        stage('Build and Test') {
+        stage('Install Dependencies') {
             steps {
-                echo 'Building project and running Selenium tests with Maven...'
-                // --- CHANGE THIS LINE FROM 'sh' TO 'bat' ---
-                bat "mvn clean test -Dallure.results.directory=${ALLURE_RESULTS_DIR}"
+                bat 'npm install'
+            }
+        }
+
+        stage('Run Tests') {
+            steps {
+                bat 'npx playwright test --reporter=line'
+            }
+        }
+
+        stage('Generate Report') {
+            steps {
+                bat 'npx playwright show-report'
             }
         }
     }
 
     post {
         always {
-            echo 'Pipeline finished.'
-            echo 'Attempting to publish Allure Report...'
-            allure([
-                reportBuildPolicy: 'ALWAYS', // Generate report always, even on failures
-                results: [[path: ALLURE_RESULTS_DIR]] // Path to the raw Allure results
-            ])
-        }
-       success {
-            echo 'Selenium tests passed successfully!'
-            // --- ADD THIS SECTION FOR SUCCESS EMAIL ---
-            emailext (
-                subject: "SUCCESS: ${env.JOB_NAME} Build #${env.BUILD_NUMBER} - Automation Tests Passed",
-                body: """
-                    Hello Team,
-
-                    The Selenium automation tests for ${env.JOB_NAME} Build #${env.BUILD_NUMBER} have passed successfully!
-
-                    You can view the detailed Allure Report here:
-                    ${env.BUILD_URL}allure/
-
-                    Build URL: ${env.BUILD_URL}
-
-                    Best regards,
-                    Jenkins Automation
-                """,
-                to: 'stakeholder1@example.com', // Replace with actual email addresses
-                // Add more recipients as needed (cc, bcc)
-                // cc: 'qa-lead@example.com',
-                // attachLog: true // Attach console output log
-            )
-            // ----------------------------------------
-        }
-        failure {
-            echo 'Selenium tests failed! Check the Allure Report for details.'
-            // --- ADD THIS SECTION FOR FAILURE EMAIL ---
-            emailext (
-                subject: "FAILURE: ${env.JOB_NAME} Build #${env.BUILD_NUMBER} - Selenium Tests Failed",
-                body: """
-                    Hello Team,
-
-                    The Selenium automation tests for ${env.JOB_NAME} Build #${env.BUILD_NUMBER} have FAILED.
-
-                    Please review the console output for errors:
-                    ${env.BUILD_URL}console
-
-                    You can view the detailed Allure Report here:
-                    ${env.BUILD_URL}allure/
-
-                    Build URL: ${env.BUILD_URL}
-
-                    Best regards,
-                    Jenkins Automation
-                """,
-                to: 'stakeholder1@example.com, stakeholder2@example.com', // Replace with actual email addresses
-                // Add more recipients as needed (cc, bcc)
-                // cc: 'dev-team@example.com',
-                // attachLog: true // Attach console output log
-            )
-            // ----------------------------------------
+            archiveArtifacts artifacts: '**/playwright-report/**', fingerprint: true
         }
     }
 }
