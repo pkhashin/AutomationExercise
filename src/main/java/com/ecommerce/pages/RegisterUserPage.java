@@ -1,8 +1,7 @@
 package com.ecommerce.pages;
 
-
-import com.ecommerce.driverManager.ElementActions;
 import com.ecommerce.pages.repo.RegisterRepo;
+import com.ecommerce.utils.ElementActions;
 import com.ecommerce.utils.JsonReader;
 import com.github.javafaker.Faker;
 import io.qameta.allure.Step;
@@ -16,7 +15,7 @@ public class RegisterUserPage extends RegisterRepo {
     private static final Logger log = LoggerFactory.getLogger(LoginSignupPage.class);
     Map<String, String> register = JsonReader.readJsonFile("registerUser.json");
     private final ElementActions eleUtil;
-    private WebDriver driver;
+    private final WebDriver driver;
 
     public RegisterUserPage(WebDriver driver) {
         this.driver = driver;

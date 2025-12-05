@@ -1,20 +1,19 @@
 package com.ecommerce.pages;
 
-import com.ecommerce.driverManager.ElementActions;
 import com.ecommerce.constants.AppConstants;
 import com.ecommerce.pages.repo.LoginSignUpRepo;
+import com.ecommerce.utils.ElementActions;
 import io.qameta.allure.Step;
-import lombok.extern.slf4j.Slf4j;
 import org.openqa.selenium.WebDriver;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 
-@Slf4j
+
 public class LoginSignupPage extends LoginSignUpRepo {
     private static final Logger log = LoggerFactory.getLogger(LoginSignupPage.class);
     private final ElementActions eleUtil;
-    private WebDriver driver;
+    private final WebDriver driver;
 
     public LoginSignupPage(WebDriver driver) {
         this.driver = driver;

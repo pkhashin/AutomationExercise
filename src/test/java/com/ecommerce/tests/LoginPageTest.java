@@ -5,7 +5,6 @@ import com.ecommerce.constants.AppConstants;
 import com.ecommerce.utils.JsonReader;
 import io.qameta.allure.Severity;
 import io.qameta.allure.SeverityLevel;
-import lombok.extern.slf4j.Slf4j;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.testng.Assert;
@@ -13,7 +12,7 @@ import org.testng.annotations.Test;
 
 import java.util.Map;
 
-@Slf4j
+
 public class LoginPageTest extends BaseTest {
     private static final Logger log = LoggerFactory.getLogger(LoginPageTest.class);
     Map<String, String> login = JsonReader.readJsonFile("loginCredentials.json");

@@ -1,7 +1,7 @@
 package com.ecommerce.pages;
 
-import com.ecommerce.driverManager.ElementActions;
 import com.ecommerce.pages.repo.AccountRepo;
+import com.ecommerce.utils.ElementActions;
 import org.openqa.selenium.WebDriver;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
